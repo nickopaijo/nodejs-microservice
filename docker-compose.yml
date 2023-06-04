@@ -1,0 +1,42 @@
+version: '1'
+services:
+  lb:
+    image: dockercloud/haproxy
+    links:
+      - api-gateway
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+    ports:
+      - 80:80
+    restart: on-failure
+  
+  api-gateway:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: microservice-worker/api-gateway:dev
+    restart: on-failure
+    environment:
+      - VIRTUAL_HOST=api-gateway.app.com
+    ports:
+      - 3500:3500
+    volumes:
+      - ./api-gateway:/app/src
+  
+  order-service:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: microservice-worker/order-service:dev
+    restart: on-failure
+    volumes:
+      - ./order-service:/app/src
+  
+  delivery-service:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: microservice-worker/delivery-service:dev
+    restart: on-failure
+    volumes:
+      - ./delivery-service:/app/src
